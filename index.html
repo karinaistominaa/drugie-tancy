@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Мерч DRUGIE TANCY — худи, футболки, кепки и аксессуары студии.">
+  <meta name="theme-color" content="#0a0a0a">
+  <title>Мерч — DRUGIE TANCY</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@700;900&display=swap" rel="stylesheet">
+  
+  <!-- ВОТ ЭТА СТРОКА ПОДКЛЮЧАЕТ ТВОЙ CSS ФАЙЛ -->
+  <link rel="stylesheet" href="style.css">
+  
+</head>
+<body class="light-theme">
+  <header class="header">
+    <nav class="navbar" aria-label="Основная навигация">
+      <a class="logo" href="#">DRUGIE <span>TANCY</span></a>
+      <div class="nav-tools">
+        <div class="language-switch" role="group" aria-label="Язык сайта">
+          <button type="button" data-language="ru" aria-pressed="true">RU</button>
+          <button type="button" data-language="en" aria-pressed="false">EN</button>
+        </div>
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Включить тёмную тему">☾</button>
+        <button class="cart-btn" id="cart-open" type="button" aria-label="Открыть корзину">
+          <span aria-hidden="true">🛒</span><span class="label">Корзина</span><span class="cart-count" id="cart-count">0</span>
+        </button>
+        <button class="burger" type="button" aria-label="Открыть меню" aria-expanded="false" aria-controls="nav-menu">☰</button>
+      </div>
+      <ul class="nav-links" id="nav-menu">
+        <li><a href="#catalog">Каталог</a></li>
+        <li><a href="#info">Доставка</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="eyebrow">Официальный мерч</div>
+        <h1>MERCH <span>DRUGIE TANCY</span></h1>
+        <p>Худи, футболки, кепки и аксессуары студии. Носите свой стиль и поддерживайте команду.</p>
+      </div>
+    </section>
+
+    <section class="content wrap" id="catalog">
+      <h2>Каталог</h2>
+      <div class="grid" id="product-grid"></div>
+    </section>
+
+    <section class="content alt" id="info">
+      <div class="wrap">
+        <h2>Оплата и доставка</h2>
+        <div class="info-note">
+          Оплата наличными при получении или переводом. Самовывоз со студии в Макеевке и Нижней Крынке,
+          либо доставка по договорённости.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">© <span>DRUGIE TANCY</span> · Мерч</footer>
+
+  <div class="cart-overlay" id="cart-overlay"></div>
+  <aside class="cart-drawer" id="cart-drawer" aria-label="Корзина" aria-hidden="true">
+    <header>
+      <h2>Корзина</h2>
+      <button class="close" type="button" id="cart-close" aria-label="Закрыть корзину">×</button>
+    </header>
+    <div class="cart-items" id="cart-items"></div>
+    <footer>
+      <div class="cart-total"><span>Итого:</span><span class="price" id="cart-total">0 ₽</span></div>
+      <button class="btn" id="checkout" type="button">Оформить заказ</button>
+      <div class="checkout-status" id="checkout-status" role="status" aria-live="polite"></div>
+    </footer>
+  </aside>
+
+  <script>
+    (function () {
+      var THEME_KEY = 'drugie-tancy-theme';
+      var themeToggle = document.getElementById('theme-toggle');
+      function applyTheme(isLight) {
+        if (isLight) {
+          document.body.classList.add('light-theme');
+          themeToggle.textContent = '☾';
+          themeToggle.setAttribute('aria-label', 'Включить тёмную тему');
+        } else {
+          document.body.classList.remove('light-theme');
+          themeToggle.textContent = '☀';
+          themeToggle.setAttribute('aria-label', 'Включить светлую тему');
+        }
+      }
+      var saved = null; try { saved = localStorage.getItem(THEME_KEY); } catch (e) {}
+      if (saved === 'dark') applyTheme(false);
+      else if (saved === 'light') applyTheme(true);
+      else applyTheme(document.body.classList.contains('light-theme'));
+      themeToggle.addEventListener('click', function () {
+        var willBeLight = !document.body.classList.contains('light-theme');
+        applyTheme(willBeLight);
+        try { localStorage.setItem(THEME_KEY, willBeLight ? 'light' : 'dark'); } catch (e) {}
+      });
+
+      var burger = document.querySelector('.burger');
+      var navMenu = document.getElementById('nav-menu');
+      burger.addEventListener('click', function () {
+        var open = navMenu.classList.toggle('open');
+        burger.setAttribute('aria-expanded', String(open));
+      });
+      navMenu.addEventListener('click', function (e) {
+        if (e.target.closest('a') && navMenu.classList.contains('open')) {
+          navMenu.classList.remove('open');
+          burger.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      document.querySelectorAll('.language-switch button[data-language]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          document.querySelectorAll('.language-switch button').forEach(function (b) {
+            b.setAttribute('aria-pressed', String(b === btn));
+          });
+          document.documentElement.setAttribute('lang', btn.getAttribute('data-language'));
+        });
+      });
+
+      var PRODUCTS = [
+        { id: 'hoodie', name: 'Худи Oversize',    category: 'Одежда',      price: 4200, glyph: '🧥', sizes: ['S','M','L','XL'] },
+        { id: 'tee',    name: 'Футболка Classic', category: 'Одежда',      price: 1800, glyph: '👕', sizes: ['S','M','L','XL'] },
+        { id: 'cap',    name: 'Кепка с логотипом',category: 'Аксессуары', price: 1200, glyph: '🧢', sizes: ['one'] },
+        { id: 'socks',  name: 'Носки (пара)',     category: 'Аксессуары',  price: 600,  glyph: '🧦', sizes: ['one'] },
+        { id: 'tote',   name: 'Шопер',            category: 'Аксессуары',  price: 900,  glyph: '👜', sizes: ['one'] },
+        { id: 'bottle', name: 'Бутылка для воды', category: 'Аксессуары',  price: 1100, glyph: '🍶', sizes: ['one'] }
+      ];
+
+      function formatPrice(n) { return n.toLocaleString('ru-RU') + ' ₽'; }
+      var selectedSize = {};
+      PRODUCTS.forEach(function (p) { selectedSize[p.id] = p.sizes[0]; });
+
+      var grid = document.getElementById('product-grid');
+      grid.innerHTML = PRODUCTS.map(function (p) {
+        var sizesHtml = p.sizes.length > 1
+          ? '<div class="sizes">' + p.sizes.map(function (s) {
+              return '<button class="size-btn" type="button" data-product="' + p.id +
+                     '" data-size="' + s + '" aria-pressed="' + (s === selectedSize[p.id]) + '">' + s + '</button>';
+            }).join('') + '</div>'
+          : '';
+        return (
+          '<article class="product">' +
+            '<div class="product-art" aria-hidden="true"><span class="glyph">' + p.glyph + '</span></div>' +
+            '<div class="product-body">' +
+              '<div class="tag">' + p.category + '</div>' +
+              '<h3>' + p.name + '</h3>' +
+              '<div class="price">' + formatPrice(p.price) + '</div>' +
+              sizesHtml +
+              '<div class="product-foot"><button class="btn" type="button" data-add="' + p.id + '">В корзину</button></div>' +
+            '</div>' +
+          '</article>'
+        );
+      }).join('');
+
+      grid.addEventListener('click', function (e) {
+        var sizeBtn = e.target.closest('.size-btn');
+        if (sizeBtn) {
+          var pid = sizeBtn.getAttribute('data-product');
+          selectedSize[pid] = sizeBtn.getAttribute('data-size');
+          sizeBtn.parentElement.querySelectorAll('.size-btn').forEach(function (b) {
+            b.setAttribute('aria-pressed', String(b === sizeBtn));
+          });
+          return;
+        }
+        var addBtn = e.target.closest('[data-add]');
+        if (addBtn) {
+          var id = addBtn.getAttribute('data-add');
+          var product = PRODUCTS.find(function (x) { return x.id === id; });
+          if (product) addToCart(product, selectedSize[id]);
+        }
+      });
+
+      var CART_KEY = 'drugie-tancy-cart';
+      var cart = [];
+      try { cart = JSON.parse(localStorage.getItem(CART_KEY) || '[]') || []; } catch (e) { cart = []; }
+
+      var cartCountEl = document.getElementById('cart-count');
+      var cartItemsEl = document.getElementById('cart-items');
+      var cartTotalEl = document.getElementById('cart-total');
+      var drawer = document.getElementById('cart-drawer');
+      var overlay = document.getElementById('cart-overlay');
+      var checkoutStatus = document.getElementById('checkout-status');
+
+      function saveCart() { try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) {} }
+
+      function addToCart(product, size) {
+        var existing = cart.find(function (it) { return it.id === product.id && it.size === size; });
+        if (existing) existing.qty += 1;
+        else cart.push({ id: product.id, name: product.name, price: product.price, size: size, glyph: product.glyph, qty: 1 });
+        saveCart(); renderCart(); openCart();
+      }
+      function changeQty(index, delta) {
+        if (!cart[index]) return;
+        cart[index].qty += delta;
+        if (cart[index].qty <= 0) cart.splice(index, 1);
+        saveCart(); renderCart();
+      }
+      function removeItem(index) { cart.splice(index, 1); saveCart(); renderCart(); }
+
+      function renderCart() {
+        var totalQty = cart.reduce(function (s, it) { return s + it.qty; }, 0);
+        var totalSum = cart.reduce(function (s, it) { return s + it.qty * it.price; }, 0);
+        cartCountEl.textContent = String(totalQty);
+        cartTotalEl.textContent = formatPrice(totalSum);
+        document.getElementById('checkout').disabled = cart.length === 0;
+
+        if (cart.length === 0) {
+          cartItemsEl.innerHTML = '<div class="cart-empty">Корзина пуста</div>';
+          return;
+        }
+        cartItemsEl.innerHTML = cart.map(function (it, i) {
+          var sizeLabel = it.size && it.size !== 'one' ? ' · ' + it.size : '';
+          return (
+            '<div class="cart-item">' +
+              '<div class="cart-thumb" aria-hidden="true">' + it.glyph + '</div>' +
+              '<div>' +
+                '<div class="name">' + it.name + '</div>' +
+                '<div class="meta">' + formatPrice(it.price) + sizeLabel + '</div>' +
+                '<div class="qty">' +
+                  '<button type="button" data-qty="-1" data-index="' + i + '">−</button>' +
+                  '<span>' + it.qty + '</span>' +
+                  '<button type="button" data-qty="1" data-index="' + i + '">+</button>' +
+                '</div>' +
+              '</div>' +
+              '<button class="remove" type="button" data-remove="' + i + '">🗑</button>' +
+            '</div>'
+          );
+        }).join('');
+      }
+
+      cartItemsEl.addEventListener('click', function (e) {
+        var q = e.target.closest('[data-qty]');
+        if (q) { changeQty(Number(q.getAttribute('data-index')), Number(q.getAttribute('data-qty'))); return; }
+        var r = e.target.closest('[data-remove]');
+        if (r) removeItem(Number(r.getAttribute('data-remove')));
+      });
+
+      function openCart() {
+        drawer.classList.add('open'); overlay.classList.add('open');
+        drawer.setAttribute('aria-hidden', 'false');
+        checkoutStatus.textContent = '';
+      }
+      function closeCart() {
+        drawer.classList.remove('open'); overlay.classList.remove('open');
+        drawer.setAttribute('aria-hidden', 'true');
+      }
+      document.getElementById('cart-open').addEventListener('click', openCart);
+      document.getElementById('cart-close').addEventListener('click', closeCart);
+      overlay.addEventListener('click', closeCart);
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeCart(); });
+
+      document.getElementById('checkout').addEventListener('click', function () {
+        if (cart.length === 0) return;
+        checkoutStatus.textContent = 'Заказ оформлен (демо). Мы свяжемся с вами.';
+        cart = []; saveCart(); renderCart();
+      });
+
+      renderCart();
+    })();
+  </script>
+</body>
+</html>
